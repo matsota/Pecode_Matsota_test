@@ -1,0 +1,25 @@
+PODS:
+  - Alamofire (5.0.5)
+  - AlamofireNetworkActivityLogger (3.0.0):
+    - Alamofire (~> 5.0.0-rc.2)
+  - SwiftKeychainWrapper (3.4.0)
+
+DEPENDENCIES:
+  - Alamofire (~> 5.0.2)
+  - AlamofireNetworkActivityLogger
+  - SwiftKeychainWrapper (~> 3.4.0)
+
+SPEC REPOS:
+  trunk:
+    - Alamofire
+    - AlamofireNetworkActivityLogger
+    - SwiftKeychainWrapper
+
+SPEC CHECKSUMS:
+  Alamofire: df2f8f826963b08b9a870791ad48e07a10090b2e
+  AlamofireNetworkActivityLogger: 94e8a7d454a4a9800cef1d0c1d3699754493684b
+  SwiftKeychainWrapper: 6fc49fbf7d4a6b0772917acb0e53a1639f6078d6
+
+PODFILE CHECKSUM: 8de30f009db4b193c11f16d7b29c74bf3f776592
+
+COCOAPODS: 1.10.0.rc.1
