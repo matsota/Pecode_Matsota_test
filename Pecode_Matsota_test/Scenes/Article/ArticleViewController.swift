@@ -28,9 +28,15 @@ class ArticleViewController: UIViewController, Storyboarding {
         
         let page = UserDefaults.standard.integer(forKey: UserDefaults.Key.currentPageOfTopHeadlines)
         populate(from: page, for: .us)
+        
+        refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
+           refreshControl.addTarget(self, action: #selector(self.refresh(_:)), for: .valueChanged)
+           tableView.addSubview(refreshControl) // not required when using UITableViewController
     }
     
     //MARK: - Private Implementation
+    private var currentCountryState: CountriesIncluded = .us
+    private var refreshControl = UIRefreshControl()
     private var articles = [ArticleList.Article]()
     private var networkManager: NetworkProtocol?
     private var totalTopHeadlineResults = Int()
@@ -69,7 +75,7 @@ extension ArticleViewController: UITableViewDelegate, UITableViewDataSource {
     
     /// - `heightForHeaderInSection`
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return articles[section].titleSize(view.frame.width, 20, .semibold)?.height ?? 44
+        return articles[section].titleSize(view.frame.width - 20, 20, .semibold)?.height ?? 44
     }
     
     /// - `viewForHeaderInSection`
@@ -170,17 +176,33 @@ private extension ArticleViewController {
 //MARK: - Private Methods
 private extension ArticleViewController {
     
+    @objc func refresh(_ sender: AnyObject) {
+        switch self.vcState {
+        case .topHeadlines:
+            UserDefaults.standard.set(1, forKey: UserDefaults.Key.currentPageOfTopHeadlines)
+            let params = ArticleRequestParameters(.top_headlines, page: 1, currentCountryState)
+            dowloadArticles(params)
+            
+        case .browsing:
+            UserDefaults.standard.set(1, forKey: UserDefaults.Key.currentPageOfTopHeadlines)
+            let params = ArticleRequestParameters(.everything, page: 1, searchText)
+            dowloadArticles(params)
+        }
+    }
+    
     @objc func magnifierAction(_ sender: UIBarButtonItem) {
         UIRouter.instance.articleScene.showArticleSearcher(from: self, .browsing)
     }
     
     @objc func usAction(_ sender: UIBarButtonItem) {
         UserDefaults.standard.set(1, forKey: UserDefaults.Key.currentPageOfTopHeadlines)
+        currentCountryState = .us
         populate(from: 1, for: .us)
     }
     
     @objc func uaAction(_ sender: UIBarButtonItem) {
         UserDefaults.standard.set(1, forKey: UserDefaults.Key.currentPageOfTopHeadlines)
+        currentCountryState = .ua
         populate(from: 1, for: .ua)
     }
     
@@ -203,8 +225,10 @@ private extension ArticleViewController {
             }
             
             self.tableView.reloadData()
+            self.refreshControl.endRefreshing()
         }, failure: { (localizedDescription) in
             debugPrint("ERROR:", localizedDescription)
+            self.refreshControl.endRefreshing()
         })
     }
     
